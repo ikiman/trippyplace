@@ -29,14 +29,17 @@ def classify_scene(im):
 	net.blobs['data'].data[...] = transformer.preprocess('data', im)
 
 	# compute
+ 	print "net.forward"
 	out = net.forward()
 
 	result = []
 
 	with open(fpath_labels, 'rb') as f:
+	 	print "labels"
 		labels = pickle.load(f)
 		top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
 
+	 	print "to list"
 		for i, k in enumerate(top_k):
 			result.append(labels[k])
 
@@ -56,8 +59,11 @@ class S(BaseHTTPRequestHandler):
 			f.write(post_data)
 		im = caffe.io.load_image(tmp_file_name)
 		result = classify_scene(im)
+		print "classified"
 		self._set_headers()
+		print "headers"
 		self.wfile.write(json.dumps(result))
+		print "out written"
 
 def run(server_class=HTTPServer, handler_class=S, port=8000):
     server_address = ('', port)
