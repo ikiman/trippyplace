@@ -4,6 +4,7 @@ require 'faraday'
 require 'json'
 
 $token = ENV['TELEGRAM_TOKEN']
+$stdout.sync = true
 
 # Govno mocha
 class CategoriesDetector
