@@ -29,17 +29,17 @@ def classify_scene(im):
 	net.blobs['data'].data[...] = transformer.preprocess('data', im)
 
 	# compute
- 	print "net.forward"
+ 	print "DEBUG: net.forward"
 	out = net.forward()
 
 	result = []
 
 	with open(fpath_labels, 'rb') as f:
-	 	print "labels"
+	 	print "DEBUG: labels"
 		labels = pickle.load(f)
 		top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
 
-	 	print "to list"
+	 	print "DEBUG: to list"
 		for i, k in enumerate(top_k):
 			result.append(labels[k])
 
@@ -55,20 +55,23 @@ class S(BaseHTTPRequestHandler):
 		content_length = int(self.headers['Content-Length'])
 		post_data = self.rfile.read(content_length)
 		tmp_file_name = "img%s" % random.randint(0, 100000)
+		print "DEBUG: writing file"
 		with open(tmp_file_name, 'wb') as f:
 			f.write(post_data)
+		print "DEBUG: loading image"
 		im = caffe.io.load_image(tmp_file_name)
+		print "DEBUG: Classifying"
 		result = classify_scene(im)
-		print "classified"
+		print "DEBUG: classified"
 		self._set_headers()
-		print "headers"
+		print "DEBUG: headers"
 		self.wfile.write(json.dumps(result))
-		print "out written"
+		print "DEBUG: out written"
 
 def run(server_class=HTTPServer, handler_class=S, port=8000):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print 'Starting httpd...'
+    print 'DEBUG: Starting httpd...'
     httpd.serve_forever()
 
 run()
