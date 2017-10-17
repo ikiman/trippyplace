@@ -14,3 +14,4 @@ services:
     build: ./network
     restart:
       always
+    ipc: shareable
