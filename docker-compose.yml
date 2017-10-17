@@ -7,8 +7,7 @@ services:
       - network
     links:
       - network
-    environment:
-      - TELEGRAM_TOKEN
+    env_file: .env
     restart:
       always
   network:
