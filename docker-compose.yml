@@ -9,5 +9,9 @@ services:
       - network
     environment:
       - TELEGRAM_TOKEN
+    restart:
+      always
   network:
     build: ./network
+    restart:
+      always
