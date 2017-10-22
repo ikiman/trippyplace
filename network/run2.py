@@ -13,6 +13,8 @@ from PIL import Image
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import SocketServer
 import json
+import tempfile
+import os
 
 def load_labels():
   file_name_category = 'categories_places365.txt'
@@ -64,10 +66,19 @@ class S(BaseHTTPRequestHandler):
     self.end_headers()
 
   def do_POST(self):
-    content_length = int(self.headers['Content-Length'])
-    post_data = self.rfile.read(content_length)
+    del features_blobs[:]
+    classes, labels_attribute, W_attribute = load_labels()
+    model = load_model()
+    tf = returnTF()
 
-    img = Image.open(post_data)
+    params = list(model.parameters())
+    weight_softmax = params[-2].data.numpy()
+    weight_softmax[weight_softmax<0] = 0
+
+    content_length = int(self.headers['Content-Length'])
+    temp_image_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_image_file.write(self.rfile.read(content_length))
+    img = Image.open(temp_image_file)
     input_img = V(tf(img).unsqueeze(0), volatile=True)
 
     # forward pass
@@ -78,10 +89,12 @@ class S(BaseHTTPRequestHandler):
 
     responses_attribute = W_attribute.dot(features_blobs[1])
     idx_a = np.argsort(responses_attribute)
-    attributes = ', '.join([labels_attribute[idx_a[i]] for i in range(-1,-10,-1)])
-    categories = ', '.join(classes[idx[i]] for i in range(0, 5))
+    attributes = [labels_attribute[idx_a[i]] for i in range(-1,-10,-1)]
+    categories = [classes[idx[i]] for i in range(0, 5)]
 
     result = { 'attributes': attributes, 'categories': categories }
+    temp_image_file.close()
+    os.unlink(temp_image_file.name)
     self._set_headers()
     self.wfile.write(json.dumps(result))
 
@@ -90,14 +103,7 @@ def run(server_class=HTTPServer, handler_class=S, port=8000):
   httpd = server_class(server_address, handler_class)
   httpd.serve_forever()
 
-classes, labels_attribute, W_attribute = load_labels()
 features_blobs = []
-model = load_model()
-tf = returnTF()
-
-params = list(model.parameters())
-weight_softmax = params[-2].data.numpy()
-weight_softmax[weight_softmax<0] = 0
 
 # img = Image.open('image.jpg')
 # input_img = V(tf(img).unsqueeze(0), volatile=True)

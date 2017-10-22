@@ -15,8 +15,15 @@ class CategoriesDetector
     @api = api
   end
 
+  def response
+    @response ||= JSON.parse(detector_response.body)
+  end
+
   def detect
-    JSON.parse(detector_response.body)
+    response.inject('') do |result, (k,v)|
+      result += "*#{k.capitalize}*: #{v.map(&:capitalize).join(', ')}\n"
+      result
+    end.gsub(/_/, ' ').gsub(/\//, ' or ')
   end
 
   def path
@@ -56,7 +63,7 @@ Telegram::Bot::Client.run($token, logger: Logger.new($stdout)) do |bot|
       if !message.photo.empty?
         photo = message.photo.last
         detector = CategoriesDetector.new(photo, bot.api)
-        bot.api.send_message(chat_id: message.chat.id, text: detector.detect)
+        bot.api.send_message(chat_id: message.chat.id, text: detector.detect, parse_mode: 'Markdown')
       elsif message.text == 'как тебе мой хуй?'
         bot.api.send_message(chat_id: message.chat.id,
                              text: 'ну такое... маловат')
