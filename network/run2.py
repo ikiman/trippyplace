@@ -92,7 +92,7 @@ class S(BaseHTTPRequestHandler):
     attributes = [labels_attribute[idx_a[i]] for i in range(-1,-10,-1)]
     categories = [classes[idx[i]] for i in range(0, 5)]
 
-    result = { 'attributes': attributes, 'categories': categories }
+    result = { 'categories': categories, 'attributes': attributes }
     temp_image_file.close()
     os.unlink(temp_image_file.name)
     self._set_headers()
