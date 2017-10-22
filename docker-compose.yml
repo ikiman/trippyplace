@@ -2,7 +2,7 @@ version: '3'
 
 services:
   bot:
-    build: ./bot
+    image: "duderman/trippybot:0.0.1"
     depends_on:
       - network
     links:
@@ -11,7 +11,7 @@ services:
     restart:
       always
   network:
-    build: ./network
+    image: "duderman/trippynet:0.0.1"
     restart:
       always
     ipc: shareable
