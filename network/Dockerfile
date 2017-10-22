@@ -1,15 +1,20 @@
-FROM floydhub/dl-docker:cpu
+# FROM floydhub/dl-docker:cpu
+FROM python:2.7-slim
 
-WORKDIR /root/caffe
+WORKDIR /root
 
-RUN wget http://places2.csail.mit.edu/models_places365/alexnet_places365.caffemodel && \
-    wget https://raw.githubusercontent.com/metalbubble/places365/master/deploy_alexnet_places365.prototxt && \
-    mkdir models_places && \
-    mv alexnet_places365.caffemodel deploy_alexnet_places365.prototxt models_places
+RUN apt-get update && apt-get install -y wget
+RUN pip install http://download.pytorch.org/whl/cu75/torch-0.2.0.post3-cp27-cp27mu-manylinux1_x86_64.whl
+RUN pip install torchvision
+RUN pip install -U numpy
+RUN pip install scipy
+RUN wget https://raw.githubusercontent.com/csailvision/places365/master/categories_places365.txt
+RUN wget https://raw.githubusercontent.com/csailvision/places365/master/labels_sunattribute.txt
+RUN wget http://places2.csail.mit.edu/models_places365/W_sceneattribute_wideresnet18.npy
+RUN wget https://raw.githubusercontent.com/csailvision/places365/master/wideresnet.py
 
-COPY ./resources /root/caffe/resources
-COPY ./run.py /root/caffe/run.py
+COPY . .
 
 EXPOSE 8000
 
-CMD ["python", "run.py"]
+CMD ["python", "run2.py"]

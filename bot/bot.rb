@@ -16,7 +16,7 @@ class CategoriesDetector
   end
 
   def detect
-    decoded_body.join(', ')
+    JSON.parse(detector_response.body)
   end
 
   def path
@@ -33,10 +33,6 @@ class CategoriesDetector
       req.headers['Content-Length'] = size
       req.body = data
     end
-  end
-
-  def decoded_body
-    JSON.parse(detector_response.body)
   end
 
   def conn
